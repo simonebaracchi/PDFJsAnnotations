@@ -141,16 +141,6 @@ var PDFAnnotate = function (container_id, url, options = {}) {
         fontSize: inst.font_size,
         selectable: true,
       });
-    } else if (inst.active_tool == 4) {
-      toolObj = new fabric.Rect({
-        left: event.clientX - fabricObj.upperCanvasEl.getBoundingClientRect().left,
-        top: event.clientY - fabricObj.upperCanvasEl.getBoundingClientRect().top,
-        width: 100,
-        height: 100,
-        fill: inst.color,
-        stroke: inst.borderColor,
-        strokeWidth: inst.borderSize,
-      });
     }
 
     if (toolObj) {
@@ -198,6 +188,7 @@ PDFAnnotate.prototype.enableRectangle = function () {
   if (inst.fabricObjects.length > 0) {
     $.each(inst.fabricObjects, function (index, fabricObj) {
       fabricObj.isDrawingMode = false;
+      new Rectangle(fabricObj, inst.color, inst.borderSize, null);
     });
   }
 };
