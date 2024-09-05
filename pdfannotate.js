@@ -193,6 +193,17 @@ PDFAnnotate.prototype.enableRectangle = function () {
   }
 };
 
+PDFAnnotate.prototype.enableEllipse = function () {
+  var inst = this;
+  inst.active_tool = 5;
+  if (inst.fabricObjects.length > 0) {
+    $.each(inst.fabricObjects, function (index, fabricObj) {
+      fabricObj.isDrawingMode = false;
+      new Ellipse(fabricObj, inst.color, inst.borderSize, null);
+    });
+  }
+};
+
 PDFAnnotate.prototype.enableAddArrow = function (onDrawnCallback = null) {
   var inst = this;
   inst.active_tool = 3;

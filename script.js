@@ -55,6 +55,11 @@ function enableRectangle(event) {
   changeActiveTool(event);
   pdf.enableRectangle();
 }
+function enableEllipse(event) {
+  event.preventDefault();
+  changeActiveTool(event);
+  pdf.enableEllipse();
+}
 
 function deleteSelectedObject(event) {
   event.preventDefault();
