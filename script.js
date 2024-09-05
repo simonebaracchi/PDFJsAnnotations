@@ -11,6 +11,7 @@ var pdf = new PDFAnnotate('pdf-container', 'sample.pdf', {
 });
 pdf.setFillOpacity(0.3);
 pdf.setBorderSize(1);
+pdf.setColor($('.color-tool.active').get(0).style.backgroundColor);
 
 function changeActiveTool(event) {
   var element = $(event.target).hasClass('tool-button')
@@ -52,7 +53,6 @@ function addImage(event) {
 function enableRectangle(event) {
   event.preventDefault();
   changeActiveTool(event);
-  pdf.setColor('rgba(255, 0, 0)');
   pdf.enableRectangle();
 }
 
