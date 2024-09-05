@@ -11,6 +11,8 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   this.fabricObjectsData = [];
   this.color = '#212121';
   this.borderColor = '#000000';
+  this.forceFillOpacity = false;
+  this.fillOpacity = 0;
   this.borderSize = 1;
   this.font_size = 16;
   this.active_canvas = 0;
@@ -299,6 +301,11 @@ PDFAnnotate.prototype.setBrushSize = function (size) {
 
 PDFAnnotate.prototype.setColor = function (color) {
   var inst = this;
+  if(inst.forceFillOpacity) {
+    color = new fabric.Color(color);
+    color.setAlpha(inst.fillOpacity);
+    color = color.toRgba();
+  }
   inst.color = color;
   $.each(inst.fabricObjects, function (index, fabricObj) {
     fabricObj.freeDrawingBrush.color = color;
@@ -316,6 +323,11 @@ PDFAnnotate.prototype.setFontSize = function (size) {
 
 PDFAnnotate.prototype.setBorderSize = function (size) {
   this.borderSize = size;
+};
+
+PDFAnnotate.prototype.setFillOpacity = function (alpha) {
+  this.forceFillOpacity = true;
+  this.fillOpacity = alpha;
 };
 
 PDFAnnotate.prototype.clearActivePage = function () {

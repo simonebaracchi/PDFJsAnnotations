@@ -9,6 +9,8 @@ var pdf = new PDFAnnotate('pdf-container', 'sample.pdf', {
   scale: 1.5,
   pageImageCompression: 'MEDIUM', // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
 });
+pdf.setFillOpacity(0.3);
+pdf.setBorderSize(0);
 
 function changeActiveTool(event) {
   var element = $(event.target).hasClass('tool-button')
@@ -50,8 +52,7 @@ function addImage(event) {
 function enableRectangle(event) {
   event.preventDefault();
   changeActiveTool(event);
-  pdf.setColor('rgba(255, 0, 0, 0.3)');
-  pdf.setBorderColor('blue');
+  pdf.setColor('rgba(255, 0, 0)');
   pdf.enableRectangle();
 }
 
