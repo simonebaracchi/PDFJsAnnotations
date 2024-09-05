@@ -149,7 +149,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
         height: 100,
         fill: inst.color,
         stroke: inst.borderColor,
-        strokeSize: inst.borderSize,
+        strokeWidth: inst.borderSize,
       });
     }
 
