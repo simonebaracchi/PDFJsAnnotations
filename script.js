@@ -10,7 +10,7 @@ var pdf = new PDFAnnotate('pdf-container', 'sample.pdf', {
   pageImageCompression: 'MEDIUM', // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
 });
 pdf.setFillOpacity(0.3);
-pdf.setBorderSize(0);
+pdf.setBorderSize(1);
 
 function changeActiveTool(event) {
   var element = $(event.target).hasClass('tool-button')
