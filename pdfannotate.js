@@ -194,7 +194,6 @@ PDFAnnotate.prototype.enableAddText = function (text) {
 
 PDFAnnotate.prototype.enableRectangle = function () {
   var inst = this;
-  var fabricObj = inst.fabricObjects[inst.active_canvas];
   inst.active_tool = 4;
   if (inst.fabricObjects.length > 0) {
     $.each(inst.fabricObjects, function (index, fabricObj) {
