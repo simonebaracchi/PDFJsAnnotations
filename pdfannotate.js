@@ -208,7 +208,6 @@ PDFAnnotate.prototype.enableAddArrow = function (onDrawnCallback = null) {
     $.each(inst.fabricObjects, function (index, fabricObj) {
       fabricObj.isDrawingMode = false;
       new Arrow(fabricObj, inst.color, function () {
-        inst.active_tool = 0;
         if (typeof onDrawnCallback === 'function') {
           onDrawnCallback();
         }

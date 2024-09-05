@@ -87,7 +87,7 @@ var Arrow = (function() {
   Arrow.prototype.onMouseUp = function(o) {
     var inst = this;
     inst.disable();
-    inst.unBindEventes();
+    /* inst.unBindEventes(); */
     if (inst.callback) inst.callback();
   };
 
@@ -123,7 +123,7 @@ var Arrow = (function() {
       hasControls: true,
       selectable: true
     });
-    
+
     inst.canvas.add(line).setActiveObject(line);
   };
 

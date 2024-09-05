@@ -39,9 +39,7 @@ function enableAddText(event) {
 function enableAddArrow(event) {
   event.preventDefault();
   changeActiveTool(event);
-  pdf.enableAddArrow(function () {
-    $('.tool-button').first().find('i').click();
-  });
+  pdf.enableAddArrow();
 }
 
 function addImage(event) {
