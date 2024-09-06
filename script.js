@@ -7,6 +7,12 @@ var pdf = new PDFAnnotate('pdf-container', 'sample.pdf', {
   ready() {
     console.log('Plugin initialized successfully');
     pdf.loadFromJSON(sampleOutput);
+
+    $('html').keyup(function (e) {
+      if (e.keyCode == 46) {
+        pdf.deleteSelectedObject();
+      }
+    });
   },
   scale: 1.5,
   pageImageCompression: 'MEDIUM', // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
