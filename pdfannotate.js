@@ -23,6 +23,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   this.textBoxText = 'Sample Text';
   this.format;
   this.orientation;
+  this.autoConfirmBeforeDeletingObject = true;
 
   this.brush = new Brush(function (brush) {
     $.each(inst.fabricObjects, function (index, fabricObj) {
@@ -280,7 +281,7 @@ PDFAnnotate.prototype.deleteSelectedObject = function () {
   var inst = this;
   var activeObject = inst.fabricObjects[inst.active_canvas].getActiveObject();
   if (activeObject) {
-    if (confirm('Are you sure ?')) {
+    if (inst.autoConfirmBeforeDeletingObject || confirm('Are you sure ?')) {
       inst.fabricObjects[inst.active_canvas].remove(activeObject);
     }
   }
