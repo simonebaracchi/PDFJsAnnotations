@@ -48,11 +48,11 @@ fabric.LineArrow.fromObject = function (object, callback) {
 fabric.LineArrow.async = true;
 
 var Arrow = (function () {
-  function Arrow(canvas, color, callback) {
+  function Arrow(canvas, brush, callback) {
     this.canvas = canvas;
     this.className = 'Arrow';
     this.isDrawing = false;
-    this.color = color;
+    this.brush = brush;
     this.callback = callback;
     this.bindEvents();
   }
@@ -73,7 +73,11 @@ var Arrow = (function () {
     });
   };
 
-  Arrow.prototype.unBindEventes = function () {
+  Arrow.prototype.stop = function () {
+    this.unBindEvents();
+  };
+
+  Arrow.prototype.unBindEvents = function () {
     var inst = this;
     inst.canvas.off('mouse:down');
     inst.canvas.off('mouse:up');
@@ -84,7 +88,6 @@ var Arrow = (function () {
   Arrow.prototype.onMouseUp = function (o) {
     var inst = this;
     inst.disable();
-    /* inst.unBindEventes(); */
     if (inst.callback) inst.callback();
   };
 
@@ -112,8 +115,8 @@ var Arrow = (function () {
     var points = [pointer.x, pointer.y, pointer.x, pointer.y];
     var line = new fabric.LineArrow(points, {
       strokeWidth: 5,
-      fill: inst.color ? inst.color : 'red',
-      stroke: inst.color ? inst.color : 'red',
+      fill: inst.brush.color ? inst.brush.color : 'red',
+      stroke: inst.brush.color ? inst.brush.color : 'red',
       originX: 'center',
       originY: 'center',
       hasBorders: false,

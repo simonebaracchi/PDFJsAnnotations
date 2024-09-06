@@ -12,15 +12,18 @@ fabric.InteractiveEllipse = fabric.util.createClass(fabric.Ellipse, {
 });
 
 var Ellipse = (function () {
-  function Ellipse(canvas, color, borderSize, callback) {
+  function Ellipse(canvas, brush, callback) {
     this.canvas = canvas;
     this.className = 'Ellipse';
     this.isDrawing = false;
-    this.color = color;
-    this.borderSize = borderSize;
+    this.brush = brush;
     this.callback = callback;
     this.bindEvents();
   }
+
+  Ellipse.prototype.stop = function () {
+    this.unBindEvents();
+  };
 
   Ellipse.prototype.bindEvents = function () {
     var inst = this;
@@ -38,7 +41,7 @@ var Ellipse = (function () {
     });
   };
 
-  Ellipse.prototype.unBindEventes = function () {
+  Ellipse.prototype.unBindEvents = function () {
     var inst = this;
     inst.canvas.off('mouse:down');
     inst.canvas.off('mouse:up');
@@ -49,7 +52,6 @@ var Ellipse = (function () {
   Ellipse.prototype.onMouseUp = function (o) {
     var inst = this;
     inst.disable();
-    /* inst.unBindEventes(); */
     if (inst.callback) inst.callback();
   };
 
@@ -77,9 +79,9 @@ var Ellipse = (function () {
     var pointer = inst.canvas.getPointer(o.e);
 
     var line = new fabric.InteractiveEllipse({
-      strokeWidth: inst.borderSize,
-      fill: inst.color ? inst.color : 'red',
-      stroke: inst.color ? inst.color : 'red',
+      strokeWidth: inst.brush.borderSize,
+      fill: inst.brush.color ? inst.brush.color : 'red',
+      stroke: inst.brush.color ? inst.brush.color : 'red',
       hasBorders: false,
       hasControls: true,
       selectable: true,
