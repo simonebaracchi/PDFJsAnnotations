@@ -73,6 +73,7 @@ var Rectangle = (function () {
 
   Rectangle.prototype.onMouseDown = function (o) {
     var inst = this;
+    if (o.target) return;
     inst.enable();
     var pointer = inst.canvas.getPointer(o.e);
 
