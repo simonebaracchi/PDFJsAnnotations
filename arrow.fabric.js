@@ -4,19 +4,18 @@
 
 // Extended fabric line class
 fabric.LineArrow = fabric.util.createClass(fabric.Line, {
-
   type: 'lineArrow',
 
-  initialize: function(element, options) {
+  initialize: function (element, options) {
     options || (options = {});
     this.callSuper('initialize', element, options);
   },
 
-  toObject: function() {
+  toObject: function () {
     return fabric.util.object.extend(this.callSuper('toObject'));
   },
 
-  _render: function(ctx) {
+  _render: function (ctx) {
     this.callSuper('_render', ctx);
 
     // do not render if width/height are zeros or object is not visible
@@ -39,18 +38,16 @@ fabric.LineArrow = fabric.util.createClass(fabric.Line, {
     ctx.fill();
 
     ctx.restore();
-
-  }
+  },
 });
 
-fabric.LineArrow.fromObject = function(object, callback) {
+fabric.LineArrow.fromObject = function (object, callback) {
   callback && callback(new fabric.LineArrow([object.x1, object.y1, object.x2, object.y2], object));
 };
 
 fabric.LineArrow.async = true;
 
-
-var Arrow = (function() {
+var Arrow = (function () {
   function Arrow(canvas, color, callback) {
     this.canvas = canvas;
     this.className = 'Arrow';
@@ -60,21 +57,21 @@ var Arrow = (function() {
     this.bindEvents();
   }
 
-  Arrow.prototype.bindEvents = function() {
+  Arrow.prototype.bindEvents = function () {
     var inst = this;
-    inst.canvas.on('mouse:down', function(o) {
+    inst.canvas.on('mouse:down', function (o) {
       inst.onMouseDown(o);
     });
-    inst.canvas.on('mouse:move', function(o) {
+    inst.canvas.on('mouse:move', function (o) {
       inst.onMouseMove(o);
     });
-    inst.canvas.on('mouse:up', function(o) {
+    inst.canvas.on('mouse:up', function (o) {
       inst.onMouseUp(o);
     });
-    inst.canvas.on('object:moving', function(o) {
+    inst.canvas.on('object:moving', function (o) {
       inst.disable();
-    })
-  }
+    });
+  };
 
   Arrow.prototype.unBindEventes = function () {
     var inst = this;
@@ -82,16 +79,16 @@ var Arrow = (function() {
     inst.canvas.off('mouse:up');
     inst.canvas.off('mouse:move');
     inst.canvas.off('object:moving');
-  }
+  };
 
-  Arrow.prototype.onMouseUp = function(o) {
+  Arrow.prototype.onMouseUp = function (o) {
     var inst = this;
     inst.disable();
     /* inst.unBindEventes(); */
     if (inst.callback) inst.callback();
   };
 
-  Arrow.prototype.onMouseMove = function(o) {
+  Arrow.prototype.onMouseMove = function (o) {
     var inst = this;
     if (!inst.isEnable()) {
       return;
@@ -101,13 +98,13 @@ var Arrow = (function() {
     var activeObj = inst.canvas.getActiveObject();
     activeObj.set({
       x2: pointer.x,
-      y2: pointer.y
+      y2: pointer.y,
     });
     activeObj.setCoords();
     inst.canvas.renderAll();
   };
 
-  Arrow.prototype.onMouseDown = function(o) {
+  Arrow.prototype.onMouseDown = function (o) {
     var inst = this;
     inst.enable();
     var pointer = inst.canvas.getPointer(o.e);
@@ -115,29 +112,29 @@ var Arrow = (function() {
     var points = [pointer.x, pointer.y, pointer.x, pointer.y];
     var line = new fabric.LineArrow(points, {
       strokeWidth: 5,
-      fill: (inst.color) ? inst.color : 'red',
-      stroke: (inst.color) ? inst.color : 'red',
+      fill: inst.color ? inst.color : 'red',
+      stroke: inst.color ? inst.color : 'red',
       originX: 'center',
       originY: 'center',
       hasBorders: false,
       hasControls: true,
-      selectable: true
+      selectable: true,
     });
 
     inst.canvas.add(line).setActiveObject(line);
   };
 
-  Arrow.prototype.isEnable = function() {
+  Arrow.prototype.isEnable = function () {
     return this.isDrawing;
-  }
+  };
 
-  Arrow.prototype.enable = function() {
+  Arrow.prototype.enable = function () {
     this.isDrawing = true;
-  }
+  };
 
-  Arrow.prototype.disable = function() {
+  Arrow.prototype.disable = function () {
     this.isDrawing = false;
-  }
+  };
 
   return Arrow;
-}());
+})();

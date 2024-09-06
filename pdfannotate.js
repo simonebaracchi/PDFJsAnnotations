@@ -23,9 +23,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   this.active_canvas = 0;
   this.container_id = container_id;
   this.url = url;
-  this.pageImageCompression = options.pageImageCompression ?
-    options.pageImageCompression.toUpperCase() :
-    'NONE';
+  this.pageImageCompression = options.pageImageCompression ? options.pageImageCompression.toUpperCase() : 'NONE';
   this.textBoxText = 'Sample Text';
   this.format;
   this.orientation;
@@ -39,14 +37,10 @@ var PDFAnnotate = function (container_id, url, options = {}) {
 
       for (var i = 1; i <= pdf.numPages; i++) {
         pdf.getPage(i).then(function (page) {
-          if (typeof inst.format === 'undefined' ||
-            typeof inst.orientation === 'undefined') {
+          if (typeof inst.format === 'undefined' || typeof inst.orientation === 'undefined') {
             var originalViewport = page.getViewport({ scale: 1 });
             inst.format = [originalViewport.width, originalViewport.height];
-            inst.orientation =
-              originalViewport.width > originalViewport.height ?
-                'landscape' :
-                'portrait';
+            inst.orientation = originalViewport.width > originalViewport.height ? 'landscape' : 'portrait';
           }
 
           var viewport = page.getViewport({ scale: scale });
@@ -93,36 +87,31 @@ var PDFAnnotate = function (container_id, url, options = {}) {
         fabricObj.on('object:added', function () {
           var oldValue = Object.assign({}, inst.fabricObjectsData[index]);
           inst.fabricObjectsData[index] = fabricObj.toJSON();
-          options.onPageUpdated(
-            index + 1,
-            oldValue,
-            inst.fabricObjectsData[index]
-          );
+          options.onPageUpdated(index + 1, oldValue, inst.fabricObjectsData[index]);
         });
       }
-      fabricObj.setBackgroundImage(
-        background,
-        fabricObj.renderAll.bind(fabricObj)
-      );
+      fabricObj.setBackgroundImage(background, fabricObj.renderAll.bind(fabricObj));
 
-      $(fabricObj.upperCanvasEl).on('mousedown', function(e) {
-        $(this).data('p0', {
-          x: e.pageX,
-          y: e.pageY
-        });
-      }).on('mouseup', function(e) {
-        var p0 = $(this).data('p0'),
-          p1 = {
+      $(fabricObj.upperCanvasEl)
+        .on('mousedown', function (e) {
+          $(this).data('p0', {
             x: e.pageX,
-            y: e.pageY
-          },
-          d = Math.sqrt(Math.pow(p1.x - p0.x, 2) + Math.pow(p1.y - p0.y, 2));
+            y: e.pageY,
+          });
+        })
+        .on('mouseup', function (e) {
+          var p0 = $(this).data('p0'),
+            p1 = {
+              x: e.pageX,
+              y: e.pageY,
+            },
+            d = Math.sqrt(Math.pow(p1.x - p0.x, 2) + Math.pow(p1.y - p0.y, 2));
 
-        if (d < 4) {
-          inst.active_canvas = index;
-          inst.fabricClickHandler(e, fabricObj);
-        }
-      })
+          if (d < 4) {
+            inst.active_canvas = index;
+            inst.fabricClickHandler(e, fabricObj);
+          }
+        });
 
       fabricObj.on('after:render', function () {
         inst.fabricObjectsData[index] = fabricObj.toJSON();
@@ -288,9 +277,7 @@ PDFAnnotate.prototype.savePdf = function (fileName) {
       doc.internal.pageSize.getWidth(),
       doc.internal.pageSize.getHeight(),
       `page-${index + 1}`,
-      ['FAST', 'MEDIUM', 'SLOW'].indexOf(inst.pageImageCompression) >= 0 ?
-        inst.pageImageCompression :
-        undefined
+      ['FAST', 'MEDIUM', 'SLOW'].indexOf(inst.pageImageCompression) >= 0 ? inst.pageImageCompression : undefined
     );
     if (index === inst.fabricObjects.length - 1) {
       doc.save(fileName);
@@ -307,7 +294,7 @@ PDFAnnotate.prototype.setBrushSize = function (size) {
 
 PDFAnnotate.prototype.setColor = function (color) {
   var inst = this;
-  if(inst.forceFillOpacity) {
+  if (inst.forceFillOpacity) {
     color = new fabric.Color(color);
     color.setAlpha(inst.fillOpacity);
     color = color.toRgba();

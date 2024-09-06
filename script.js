@@ -1,4 +1,4 @@
-$.ajax({url: "./pdfannotate.min.js", dataType: "script", async: false, cache: false});
+$.ajax({ url: './pdfannotate.min.js', dataType: 'script', async: false, cache: false });
 
 var pdf = new PDFAnnotate('pdf-container', 'sample.pdf', {
   onPageUpdated(page, oldData, newData) {
