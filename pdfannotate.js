@@ -8,6 +8,8 @@ $.ajax({ url: './arrow.fabric.js', dataType: 'script', async: false, cache: fals
 $.ajax({ url: './rect.fabric.js', dataType: 'script', async: false, cache: false });
 $.ajax({ url: './ellipse.fabric.js', dataType: 'script', async: false, cache: false });
 
+const { PDFDocument, rgb } = PDFLib;
+
 var PDFAnnotate = function (container_id, url, options = {}) {
   this.number_of_pages = 0;
   this.pages_rendered = 0;
@@ -19,11 +21,14 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   this.active_canvas = 0;
   this.container_id = container_id;
   this.url = url;
-  this.pageImageCompression = options.pageImageCompression ? options.pageImageCompression.toUpperCase() : 'NONE';
+  this.pageImageCompression = options.pageImageCompression
+    ? options.pageImageCompression.toUpperCase()
+    : 'NONE'; /* deprecated */
   this.textBoxText = 'Sample Text';
   this.format;
   this.orientation;
   this.autoConfirmBeforeDeletingObject = true;
+  this.scale = 1.5;
 
   this.brush = new Brush(function (brush) {
     $.each(inst.fabricObjects, function (index, fabricObj) {
@@ -36,7 +41,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   var loadingTask = pdfjsLib.getDocument(this.url);
   loadingTask.promise.then(
     function (pdf) {
-      var scale = options.scale ? options.scale : 1.3;
+      inst.scale = options.scale ? options.scale : inst.scale;
       inst.number_of_pages = pdf.numPages;
 
       for (var i = 1; i <= pdf.numPages; i++) {
@@ -46,24 +51,21 @@ var PDFAnnotate = function (container_id, url, options = {}) {
             inst.format = [originalViewport.width, originalViewport.height];
             inst.orientation = originalViewport.width > originalViewport.height ? 'landscape' : 'portrait';
           }
-
-          var viewport = page.getViewport({ scale: scale });
-          var canvas = document.createElement('canvas');
-          document.getElementById(inst.container_id).appendChild(canvas);
-          canvas.className = 'pdf-canvas';
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-          context = canvas.getContext('2d');
-
+          var viewport = page.getViewport({ scale: inst.scale });
+          var pdfCanvas = document.createElement('canvas');
+          document.getElementById(inst.container_id).appendChild(pdfCanvas);
+          pdfCanvas.className = 'pdf-canvas';
+          pdfCanvas.height = viewport.height;
+          pdfCanvas.width = viewport.width;
+          $(pdfCanvas).attr('id', 'page-' + page.pageNumber + '-pdf-canvas');
+          context = pdfCanvas.getContext('2d');
           var renderContext = {
             canvasContext: context,
             viewport: viewport,
           };
+
           var renderTask = page.render(renderContext);
           renderTask.promise.then(function () {
-            $('.pdf-canvas').each(function (index, el) {
-              $(el).attr('id', 'page-' + (index + 1) + '-canvas');
-            });
             inst.pages_rendered++;
             if (inst.pages_rendered == inst.number_of_pages) inst.initFabric();
           });
@@ -80,12 +82,15 @@ var PDFAnnotate = function (container_id, url, options = {}) {
     let canvases = $('#' + inst.container_id + ' canvas');
     canvases.each(function (index, el) {
       var background = el.toDataURL('image/png');
+
       var fabricObj = new fabric.Canvas(el.id, {
         freeDrawingBrush: {
           width: inst.brush.brushSize,
           color: inst.brush.color,
         },
       });
+      fabricObj.setBackgroundImage(background, fabricObj.renderAll.bind(fabricObj));
+
       inst.fabricObjects.push(fabricObj);
       if (typeof options.onPageUpdated == 'function') {
         fabricObj.on('object:added', function () {
@@ -94,7 +99,6 @@ var PDFAnnotate = function (container_id, url, options = {}) {
           options.onPageUpdated(index + 1, oldValue, inst.fabricObjectsData[index]);
         });
       }
-      fabricObj.setBackgroundImage(background, fabricObj.renderAll.bind(fabricObj));
 
       $(fabricObj.upperCanvasEl)
         .on('mousedown', function (e) {
@@ -287,37 +291,34 @@ PDFAnnotate.prototype.deleteSelectedObject = function () {
   }
 };
 
-PDFAnnotate.prototype.savePdf = function (fileName) {
+PDFAnnotate.prototype.savePdf = async function (fileName) {
   var inst = this;
-  var format = inst.format || 'a4';
-  var orientation = inst.orientation || 'portrait';
-  if (!inst.fabricObjects.length) return;
-  var doc = new jspdf.jsPDF({ format, orientation });
+  const basePdfDoc = await PDFDocument.create();
+
+  inst.fabricObjects.forEach(async function (fabricObj, index) {
+    const page = basePdfDoc.addPage();
+
+    const image = await basePdfDoc.embedPng(
+      fabricObj.toDataURL({
+        format: 'png',
+      })
+    );
+
+    page.drawImage(image, {
+      x: fabricObj.x,
+      y: fabricObj.y,
+      width: fabricObj.width / inst.scale,
+      height: fabricObj.height / inst.scale,
+    });
+  });
+
+  const pdfBytes = await basePdfDoc.save();
+
   if (typeof fileName === 'undefined') {
     fileName = `${new Date().getTime()}.pdf`;
   }
-
-  inst.fabricObjects.forEach(function (fabricObj, index) {
-    if (index != 0) {
-      doc.addPage(format, orientation);
-      doc.setPage(index + 1);
-    }
-    doc.addImage(
-      fabricObj.toDataURL({
-        format: 'png',
-      }),
-      inst.pageImageCompression == 'NONE' ? 'PNG' : 'JPEG',
-      0,
-      0,
-      doc.internal.pageSize.getWidth(),
-      doc.internal.pageSize.getHeight(),
-      `page-${index + 1}`,
-      ['FAST', 'MEDIUM', 'SLOW'].indexOf(inst.pageImageCompression) >= 0 ? inst.pageImageCompression : undefined
-    );
-    if (index === inst.fabricObjects.length - 1) {
-      doc.save(fileName);
-    }
-  });
+  // Trigger the browser to download the PDF document
+  download(pdfBytes, fileName, 'application/pdf');
 };
 
 PDFAnnotate.prototype.setFontSize = function (size) {
