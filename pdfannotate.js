@@ -21,9 +21,6 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   this.active_canvas = 0;
   this.container_id = container_id;
   this.url = url;
-  this.pageImageCompression = options.pageImageCompression
-    ? options.pageImageCompression.toUpperCase()
-    : 'NONE'; /* deprecated */
   this.textBoxText = 'Sample Text';
   this.format;
   this.orientation;
@@ -52,12 +49,18 @@ var PDFAnnotate = function (container_id, url, options = {}) {
             inst.orientation = originalViewport.width > originalViewport.height ? 'landscape' : 'portrait';
           }
           var viewport = page.getViewport({ scale: inst.scale });
+
+          var pageContainer = document.createElement('div');
+          document.getElementById(inst.container_id).appendChild(pageContainer);
+          $(pageContainer).attr('id', 'page-' + page.pageNumber + '-container');
+
           var pdfCanvas = document.createElement('canvas');
-          document.getElementById(inst.container_id).appendChild(pdfCanvas);
+          pageContainer.appendChild(pdfCanvas);
           pdfCanvas.className = 'pdf-canvas';
           pdfCanvas.height = viewport.height;
           pdfCanvas.width = viewport.width;
           $(pdfCanvas).attr('id', 'page-' + page.pageNumber + '-pdf-canvas');
+
           context = pdfCanvas.getContext('2d');
           var renderContext = {
             canvasContext: context,
@@ -79,17 +82,30 @@ var PDFAnnotate = function (container_id, url, options = {}) {
 
   this.initFabric = function () {
     var inst = this;
-    let canvases = $('#' + inst.container_id + ' canvas');
+    let canvases = $('#' + inst.container_id + ' .page-container');
     canvases.each(function (index, el) {
-      var background = el.toDataURL('image/png');
+      var pdfCanvas = $(el).children().first()[0];
+      var fabricCanvasWrapper = document.createElement('div');
+      el.appendChild(fabricCanvasWrapper);
+      $(fabricCanvasWrapper).css('position', 'absolute');
+      $(fabricCanvasWrapper).css('height', $(pdfCanvas).height());
+      $(fabricCanvasWrapper).css('width', $(pdfCanvas).width());
+      $(fabricCanvasWrapper).css('left', $(pdfCanvas).position().left);
+      $(fabricCanvasWrapper).css('top', $(pdfCanvas).position().top);
+      $(fabricCanvasWrapper).css('z-index', '1');
 
-      var fabricObj = new fabric.Canvas(el.id, {
+      var fabricCanvas = document.createElement('canvas');
+      fabricCanvasWrapper.appendChild(fabricCanvas);
+      $(fabricCanvas).attr('id', 'page-' + index++ + '-fabric-canvas');
+
+      var fabricObj = new fabric.Canvas(fabricCanvas.id, {
         freeDrawingBrush: {
           width: inst.brush.brushSize,
           color: inst.brush.color,
         },
       });
-      fabricObj.setBackgroundImage(background, fabricObj.renderAll.bind(fabricObj));
+      fabricObj.setHeight($(pdfCanvas).height());
+      fabricObj.setWidth($(pdfCanvas).width());
 
       inst.fabricObjects.push(fabricObj);
       if (typeof options.onPageUpdated == 'function') {
@@ -293,10 +309,11 @@ PDFAnnotate.prototype.deleteSelectedObject = function () {
 
 PDFAnnotate.prototype.savePdf = async function (fileName) {
   var inst = this;
-  const basePdfDoc = await PDFDocument.create();
+  var origPdfBytes = await fetch(inst.url).then((res) => res.arrayBuffer());
+  const basePdfDoc = await PDFDocument.load(origPdfBytes);
 
   inst.fabricObjects.forEach(async function (fabricObj, index) {
-    const page = basePdfDoc.addPage();
+    var page = basePdfDoc.getPage(index);
 
     const image = await basePdfDoc.embedPng(
       fabricObj.toDataURL({
