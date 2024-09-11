@@ -64,6 +64,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
             var pageContainer = document.createElement('div');
             document.getElementById(inst.container_id).appendChild(pageContainer);
             $(pageContainer).attr('id', 'page-' + page.pageNumber + '-container');
+            pageContainer.className = 'page-container';
 
             var pdfCanvas = document.createElement('canvas');
             pageContainer.appendChild(pdfCanvas);
