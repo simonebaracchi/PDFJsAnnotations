@@ -74,9 +74,12 @@ function deleteSelectedObject(event) {
   pdf.deleteSelectedObject();
 }
 
-function savePDF() {
-  // pdf.savePdf();
-  pdf.savePdf('output.pdf'); // save with given file name
+function uploadPDF() {
+  pdf.savePdf('upload', { url: 'upload.php' }); // save with given file name
+}
+
+function downloadPDF() {
+  pdf.savePdf('download', { filename: 'output.pdf' }); // save with given file name
 }
 
 function clearPage() {

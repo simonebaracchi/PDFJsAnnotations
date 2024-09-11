@@ -320,8 +320,9 @@ PDFAnnotate.prototype.deleteSelectedObject = function () {
   }
 };
 
-PDFAnnotate.prototype.savePdf = async function (fileName) {
+PDFAnnotate.prototype.savePdf = async function (method, options) {
   var inst = this;
+  options = options ?? {};
   const basePdfDoc = await PDFDocument.load(inst.origPdfBytes);
 
   inst.fabricObjects.forEach(async function (fabricObj, index) {
@@ -343,11 +344,33 @@ PDFAnnotate.prototype.savePdf = async function (fileName) {
 
   const pdfBytes = await basePdfDoc.save();
 
-  if (typeof fileName === 'undefined') {
-    fileName = `${new Date().getTime()}.pdf`;
+  if (method == 'download') {
+    fileName = options.filename;
+    if (typeof fileName === 'undefined') {
+      fileName = `${new Date().getTime()}.pdf`;
+    }
+    // Trigger the browser to download the PDF document
+    download(pdfBytes, fileName, 'application/pdf');
+  } else if (method == 'upload') {
+    try {
+      const request = await fetch(options.url, {
+        method: 'POST',
+        body: pdfBytes,
+        headers: {
+          'Content-Type': 'application/pdf',
+        },
+      });
+      var response = await request.json();
+      var message = response.statusText ?? 'No response from server';
+      if (response.ok) {
+        console.log(message);
+      } else {
+        alert('Failed to send PDF: ' + message);
+      }
+    } catch (error) {
+      alert('Error uploading PDF: ' + error);
+    }
   }
-  // Trigger the browser to download the PDF document
-  download(pdfBytes, fileName, 'application/pdf');
 };
 
 PDFAnnotate.prototype.setFontSize = function (size) {
