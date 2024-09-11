@@ -3,10 +3,12 @@
  * Author: Ravisha Heshan
  */
 
+/*
 $.ajax({ url: './brush.js', dataType: 'script', async: false, cache: false });
 $.ajax({ url: './arrow.fabric.js', dataType: 'script', async: false, cache: false });
 $.ajax({ url: './rect.fabric.js', dataType: 'script', async: false, cache: false });
 $.ajax({ url: './ellipse.fabric.js', dataType: 'script', async: false, cache: false });
+*/
 
 const { PDFDocument, rgb } = PDFLib;
 
@@ -20,7 +22,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   this.font_size = 16;
   this.active_canvas = 0;
   this.container_id = container_id;
-  this.url = url;
+  this.origPdfBytes;
   this.textBoxText = 'Sample Text';
   this.format;
   this.orientation;
@@ -35,50 +37,60 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   });
 
   var inst = this;
-  var loadingTask = pdfjsLib.getDocument(this.url);
-  loadingTask.promise.then(
-    function (pdf) {
-      inst.scale = options.scale ? options.scale : inst.scale;
-      inst.number_of_pages = pdf.numPages;
+  fetch(url).then(function (res) {
+    var buffer = res.arrayBuffer();
+    buffer.then(function (res) {
+      inst.origPdfBytes = res;
+      inst.initPDFjs();
+    });
+  });
 
-      for (var i = 1; i <= pdf.numPages; i++) {
-        pdf.getPage(i).then(function (page) {
-          if (typeof inst.format === 'undefined' || typeof inst.orientation === 'undefined') {
-            var originalViewport = page.getViewport({ scale: 1 });
-            inst.format = [originalViewport.width, originalViewport.height];
-            inst.orientation = originalViewport.width > originalViewport.height ? 'landscape' : 'portrait';
-          }
-          var viewport = page.getViewport({ scale: inst.scale });
+  this.initPDFjs = function () {
+    var loadingTask = pdfjsLib.getDocument({ data: inst.origPdfBytes });
+    loadingTask.promise.then(
+      function (pdf) {
+        inst.scale = options.scale ? options.scale : inst.scale;
+        inst.number_of_pages = pdf.numPages;
 
-          var pageContainer = document.createElement('div');
-          document.getElementById(inst.container_id).appendChild(pageContainer);
-          $(pageContainer).attr('id', 'page-' + page.pageNumber + '-container');
+        for (var i = 1; i <= pdf.numPages; i++) {
+          pdf.getPage(i).then(function (page) {
+            if (typeof inst.format === 'undefined' || typeof inst.orientation === 'undefined') {
+              var originalViewport = page.getViewport({ scale: 1 });
+              inst.format = [originalViewport.width, originalViewport.height];
+              inst.orientation = originalViewport.width > originalViewport.height ? 'landscape' : 'portrait';
+            }
+            var viewport = page.getViewport({ scale: inst.scale });
 
-          var pdfCanvas = document.createElement('canvas');
-          pageContainer.appendChild(pdfCanvas);
-          pdfCanvas.className = 'pdf-canvas';
-          pdfCanvas.height = viewport.height;
-          pdfCanvas.width = viewport.width;
-          $(pdfCanvas).attr('id', 'page-' + page.pageNumber + '-pdf-canvas');
+            var pageContainer = document.createElement('div');
+            document.getElementById(inst.container_id).appendChild(pageContainer);
+            $(pageContainer).attr('id', 'page-' + page.pageNumber + '-container');
 
-          context = pdfCanvas.getContext('2d');
-          var renderContext = {
-            canvasContext: context,
-            viewport: viewport,
-          };
+            var pdfCanvas = document.createElement('canvas');
+            pageContainer.appendChild(pdfCanvas);
+            pdfCanvas.className = 'pdf-canvas';
+            pdfCanvas.height = viewport.height;
+            pdfCanvas.width = viewport.width;
+            $(pdfCanvas).attr('id', 'page-' + page.pageNumber + '-pdf-canvas');
 
-          var renderTask = page.render(renderContext);
-          renderTask.promise.then(function () {
-            inst.pages_rendered++;
-            if (inst.pages_rendered == inst.number_of_pages) inst.initFabric();
+            context = pdfCanvas.getContext('2d');
+            var renderContext = {
+              canvasContext: context,
+              viewport: viewport,
+            };
+
+            var renderTask = page.render(renderContext);
+            renderTask.promise.then(function () {
+              inst.pages_rendered++;
+              if (inst.pages_rendered == inst.number_of_pages) inst.initFabric();
+            });
           });
-        });
+        }
+      },
+      function (reason) {
+        console.error(reason);
       }
-    },
-    function (reason) {
-      console.error(reason);
-    }
-  );
+    );
+  };
 
   this.initFabric = function () {
     var inst = this;
@@ -309,8 +321,7 @@ PDFAnnotate.prototype.deleteSelectedObject = function () {
 
 PDFAnnotate.prototype.savePdf = async function (fileName) {
   var inst = this;
-  var origPdfBytes = await fetch(inst.url).then((res) => res.arrayBuffer());
-  const basePdfDoc = await PDFDocument.load(origPdfBytes);
+  const basePdfDoc = await PDFDocument.load(inst.origPdfBytes);
 
   inst.fabricObjects.forEach(async function (fabricObj, index) {
     var page = basePdfDoc.getPage(index);
