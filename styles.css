@@ -82,3 +82,14 @@ button:focus {
   background-color: rgb(82, 86, 89);
   border-color: rgb(82, 86, 89);
 }
+
+.page-container {
+  display: grid;
+  justify-items: center;
+}
+
+.pdf-canvas,
+.fabric-canvas {
+  grid-column: 1;
+  grid-row: 1;
+}

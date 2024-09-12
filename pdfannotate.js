@@ -99,18 +99,15 @@ var PDFAnnotate = function (container_id, url, options = {}) {
     canvases.each(function (index, el) {
       var pdfCanvas = $(el).children().first()[0];
       var fabricCanvasWrapper = document.createElement('div');
+      fabricCanvasWrapper.className = 'fabric-canvas';
       el.appendChild(fabricCanvasWrapper);
-      $(fabricCanvasWrapper).css('position', 'absolute');
       $(fabricCanvasWrapper).css('height', $(pdfCanvas).height());
       $(fabricCanvasWrapper).css('width', $(pdfCanvas).width());
-      $(fabricCanvasWrapper).css('left', $(pdfCanvas).position().left);
-      $(fabricCanvasWrapper).css('top', $(pdfCanvas).position().top);
       $(fabricCanvasWrapper).css('z-index', '1');
 
       var fabricCanvas = document.createElement('canvas');
       fabricCanvasWrapper.appendChild(fabricCanvas);
       $(fabricCanvas).attr('id', 'page-' + index + '-fabric-canvas');
-
       var fabricObj = new fabric.Canvas(fabricCanvas.id);
       fabricObj.freeDrawingBrush.width = inst.brush.brushSize;
       fabricObj.freeDrawingBrush.color = inst.brush.color;
