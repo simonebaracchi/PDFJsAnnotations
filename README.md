@@ -1,6 +1,6 @@
 # FabricJS layer on top of Mozilla's PDFJS to add ANNOTATIONS
 
-![Alt text](./Screenshot.png?raw=true "Screenshot")
+![Alt text](./Screenshot.png?raw=true 'Screenshot')
 
 # Features
 
@@ -10,11 +10,9 @@
 
 - Add text
 
-- Add arrows
+- Add arrows, rectangles, ellipses
 
-- Add rectangles
-
-- Add image
+- Add images
 
 - Change colors
 
@@ -22,24 +20,26 @@
 
 - Change Font size
 
-- Every object can be resize
+- Every object can be resized
 
 - Serialize all canvas data into JSON and re-draw
 
-- Delete individual object
+- Delete individual objects
 
 - Clear page
 
-- Export PDF with annotations (using jsPDF)
+- Download PDF file with annotations
+
+- Upload PDF to remote API endpoint
 
 **Important: exported file will be a PDF with set of images. So you won't be able to use functions like text selections. trying my best to add the text layer. Due to lack of PDFJs documentation about this section progress is very slow. If anyone interested you can check the progress on `dev` branch.**
 
-# Usage 
+# Usage
 
 ```javascript
 var pdf = new PDFAnnotate('pdf-container-id', 'http://url-to.pdf');
 
-pdf.enableSelector(); // Enable moviing tool
+pdf.enableSelector(); // Enable moving tool
 
 pdf.enablePencil(); // Enable pencil tool
 
@@ -49,19 +49,21 @@ pdf.enableAddArrow(); // Enable add arrow tool(Supports optional on draw success
 
 pdf.enableRectangle(); // Adds a rectangle
 
-pdf.addImageToCanvas() // Add an image
+pdf.enableEllipse(); // Adds a rectangle
+
+pdf.addImageToCanvas(); // Add an image
 
 pdf.deleteSelectedObject(); // Delete selected object
 
 pdf.clearActivePage(); // Clear current page
 
-pdf.savePdf(); // Save PDF with name sample.pdf
+pdf.savePdf('download', { filename: 'sample.pdf' }); // Save PDF with name sample.pdf
 
-pdf.serializePdf(function (serializedString) {
-    //
-}); // returns JSON string with canvas data
+pdf.savePdf('upload', { url: 'upload.php' }); // Upload PDF to API endpoint
 
-pdf.loadFromJSON(serializedJSON) // continue edit with saved JSON. To do this on page load use `ready` option(scripts.js line 5)
+pdf.serializePdf(function (serializedString) {}); // returns JSON string with canvas data
+
+pdf.loadFromJSON(serializedJSON); // continue edit with saved JSON. To do this on page load use `ready` option(scripts.js line 9)
 
 pdf.setColor(color, alpha); // Set color for tools (Example: pdf.setColor(red) , pdf.setColor('#fff'), pdf.setColor('rgba(255,0,0), 0.5)'))
 
