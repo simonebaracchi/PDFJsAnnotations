@@ -113,4 +113,10 @@ $(function () {
     var font_size = $(this).val();
     pdf.setFontSize(font_size);
   });
+
+  window.addEventListener('beforeunload', function (e) {
+    // trigger a confirmation dialog before leaving
+    e.preventDefault(); // For modern browsers
+    e.returnValue = ''; // For legacy browsers
+  });
 });
