@@ -109,7 +109,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
 
       var fabricCanvas = document.createElement('canvas');
       fabricCanvasWrapper.appendChild(fabricCanvas);
-      $(fabricCanvas).attr('id', 'page-' + index++ + '-fabric-canvas');
+      $(fabricCanvas).attr('id', 'page-' + index + '-fabric-canvas');
 
       var fabricObj = new fabric.Canvas(fabricCanvas.id, {
         freeDrawingBrush: {
@@ -137,15 +137,15 @@ var PDFAnnotate = function (container_id, url, options = {}) {
           });
         })
         .on('mouseup', function (e) {
-          var p0 = $(this).data('p0'),
-            p1 = {
-              x: e.pageX,
-              y: e.pageY,
-            },
-            d = Math.sqrt(Math.pow(p1.x - p0.x, 2) + Math.pow(p1.y - p0.y, 2));
+          inst.active_canvas = index;
+          var p0 = $(this).data('p0');
+          var p1 = {
+            x: e.pageX,
+            y: e.pageY,
+          };
+          var d = Math.sqrt(Math.pow(p1.x - p0.x, 2) + Math.pow(p1.y - p0.y, 2));
 
           if (d < 4) {
-            inst.active_canvas = index;
             inst.fabricClickHandler(e, fabricObj);
           }
         });
