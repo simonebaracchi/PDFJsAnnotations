@@ -64,11 +64,11 @@ var PDFAnnotate = function (container_id, url, options = {}) {
             var pageContainer = document.createElement('div');
             document.getElementById(inst.container_id).appendChild(pageContainer);
             $(pageContainer).attr('id', 'page-' + page.pageNumber + '-container');
-            pageContainer.className = 'page-container';
+            pageContainer.className = 'pdfannotate-page-container';
 
             var pdfCanvas = document.createElement('canvas');
             pageContainer.appendChild(pdfCanvas);
-            pdfCanvas.className = 'pdf-canvas';
+            pdfCanvas.className = 'pdfannotate-pdf-canvas';
             pdfCanvas.height = viewport.height;
             pdfCanvas.width = viewport.width;
             $(pdfCanvas).attr('id', 'page-' + page.pageNumber + '-pdf-canvas');
@@ -95,11 +95,11 @@ var PDFAnnotate = function (container_id, url, options = {}) {
 
   this.initFabric = function () {
     var inst = this;
-    let canvases = $('#' + inst.container_id + ' .page-container');
+    let canvases = $('#' + inst.container_id + ' .pdfannotate-page-container');
     canvases.each(function (index, el) {
       var pdfCanvas = $(el).children().first()[0];
       var fabricCanvasWrapper = document.createElement('div');
-      fabricCanvasWrapper.className = 'fabric-canvas';
+      fabricCanvasWrapper.className = 'pdfannotate-fabric-canvas';
       el.appendChild(fabricCanvasWrapper);
       $(fabricCanvasWrapper).css('height', $(pdfCanvas).height());
       $(fabricCanvasWrapper).css('width', $(pdfCanvas).width());

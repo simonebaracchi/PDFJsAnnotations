@@ -1,9 +1,20 @@
 canvas,
-.canvas-container {
+.pdfannotate-canvas-container {
   margin-bottom: 25px;
 }
 
-.canvas-container {
+.pdfannotate-canvas-container {
   margin-left: auto;
   margin-right: auto;
+}
+
+.pdfannotate-page-container {
+  display: grid;
+  justify-items: center;
+}
+
+.pdfannotate-pdf-canvas,
+.pdfannotate-fabric-canvas {
+  grid-column: 1;
+  grid-row: 1;
 }
