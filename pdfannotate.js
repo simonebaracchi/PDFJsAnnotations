@@ -29,6 +29,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   this.autoConfirmBeforeDeletingObject = true;
   this.scale = 1.5;
 
+  var inst = this;
   this.brush = new Brush(function (brush) {
     $.each(inst.fabricObjects, function (index, fabricObj) {
       fabricObj.freeDrawingBrush.color = brush.color;
@@ -36,7 +37,6 @@ var PDFAnnotate = function (container_id, url, options = {}) {
     });
   });
 
-  var inst = this;
   fetch(url).then(function (res) {
     var buffer = res.arrayBuffer();
     buffer.then(function (res) {
@@ -111,12 +111,9 @@ var PDFAnnotate = function (container_id, url, options = {}) {
       fabricCanvasWrapper.appendChild(fabricCanvas);
       $(fabricCanvas).attr('id', 'page-' + index + '-fabric-canvas');
 
-      var fabricObj = new fabric.Canvas(fabricCanvas.id, {
-        freeDrawingBrush: {
-          width: inst.brush.brushSize,
-          color: inst.brush.color,
-        },
-      });
+      var fabricObj = new fabric.Canvas(fabricCanvas.id);
+      fabricObj.freeDrawingBrush.width = inst.brush.brushSize;
+      fabricObj.freeDrawingBrush.color = inst.brush.color;
       fabricObj.setHeight($(pdfCanvas).height());
       fabricObj.setWidth($(pdfCanvas).width());
 
@@ -381,8 +378,8 @@ PDFAnnotate.prototype.setBrushSize = function (size) {
   this.brush.setBrushSize(size);
 };
 
-PDFAnnotate.prototype.setColor = function (color) {
-  this.brush.setColor(color);
+PDFAnnotate.prototype.setColor = function (color, alpha = 1) {
+  this.brush.setColor(color, alpha);
 };
 
 PDFAnnotate.prototype.setBorderColor = function (color) {
@@ -391,10 +388,6 @@ PDFAnnotate.prototype.setBorderColor = function (color) {
 
 PDFAnnotate.prototype.setBorderSize = function (size) {
   this.brush.setBorderSize(size);
-};
-
-PDFAnnotate.prototype.setFillOpacity = function (alpha) {
-  this.brush.setFillOpacity(alpha);
 };
 
 PDFAnnotate.prototype.clearActivePage = function () {

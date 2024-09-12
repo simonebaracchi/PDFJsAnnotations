@@ -63,7 +63,7 @@ pdf.serializePdf(function (serializedString) {
 
 pdf.loadFromJSON(serializedJSON) // continue edit with saved JSON. To do this on page load use `ready` option(scripts.js line 5)
 
-pdf.setColor(color); // Set color for tools (Example: pdf.setColor(red) , pdf.setColor('#fff'), pdf.setColor('rgba(255,0,0,0.5)'))
+pdf.setColor(color, alpha); // Set color for tools (Example: pdf.setColor(red) , pdf.setColor('#fff'), pdf.setColor('rgba(255,0,0), 0.5)'))
 
 pdf.setBorderColor(color); // Set border color for rectangle tool (Example: pdf.setBorderColor(red) , pdf.setBorderColor('#fff'))
 

@@ -15,11 +15,10 @@ var pdf = new PDFAnnotate('pdf-container', 'sample.pdf', {
     });
   },
   scale: 1.5,
-  pageImageCompression: 'MEDIUM', // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
 });
-pdf.setFillOpacity(0.3);
 pdf.setBorderSize(1);
-pdf.setColor($('.color-tool.active').get(0).style.backgroundColor);
+pdf.setBrushSize($('#brush-size').val());
+pdf.setColor($('.color-tool.active').get(0).style.backgroundColor, $('.color-tool.active').get(0).style.opacity);
 
 function changeActiveTool(event) {
   var element = $(event.target).hasClass('tool-button')
@@ -101,7 +100,8 @@ $(function () {
     $('.color-tool.active').removeClass('active');
     $(this).addClass('active');
     color = $(this).get(0).style.backgroundColor;
-    pdf.setColor(color);
+    alpha = $(this).get(0).style.opacity;
+    pdf.setColor(color, alpha);
   });
 
   $('#brush-size').change(function () {
