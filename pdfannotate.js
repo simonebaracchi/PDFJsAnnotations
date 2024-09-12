@@ -133,6 +133,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
         .on('mouseup', function (e) {
           inst.active_canvas = index;
           var p0 = $(this).data('p0');
+          if (typeof p0 === 'undefined') return; // Mouse movement originated from offscreen
           var p1 = {
             x: e.pageX,
             y: e.pageY,
