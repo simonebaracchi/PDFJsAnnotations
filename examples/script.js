@@ -116,7 +116,9 @@ $(function () {
 
   window.addEventListener('beforeunload', function (e) {
     // trigger a confirmation dialog before leaving
-    e.preventDefault(); // For modern browsers
-    e.returnValue = ''; // For legacy browsers
+    if (pdf.needSave) {
+      e.preventDefault(); // For modern browsers
+      e.returnValue = ''; // For legacy browsers
+    }
   });
 });

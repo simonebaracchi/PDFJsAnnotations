@@ -21,6 +21,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   this.orientation;
   this.autoConfirmBeforeDeletingObject = true;
   this.scale = 1.5;
+  this.needSave = false;
 
   var inst = this;
   this.brush = new Brush(function (brush) {
@@ -118,6 +119,9 @@ var PDFAnnotate = function (container_id, url, options = {}) {
 
       $(fabricObj.upperCanvasEl)
         .on('mousedown', function (e) {
+          if (inst.active_tool) {
+            inst.needSave = true;
+          }
           $(this).data('p0', {
             x: e.pageX,
             y: e.pageY,
@@ -288,6 +292,7 @@ PDFAnnotate.prototype.addImageToCanvas = function () {
             fabricObj.add(new fabric.Image(image));
           };
           image.src = this.result;
+          inst.needSave = true;
         },
         false
       );
@@ -339,6 +344,7 @@ PDFAnnotate.prototype.savePdf = async function (method, options) {
     }
     // Trigger the browser to download the PDF document
     download(pdfBytes, fileName, 'application/pdf');
+    inst.needSave = false;
   } else if (method == 'upload') {
     try {
       const request = await fetch(options.url, {
@@ -352,6 +358,7 @@ PDFAnnotate.prototype.savePdf = async function (method, options) {
       var message = response.statusText ?? 'No response from server';
       if (response.ok) {
         console.log(message);
+        inst.needSave = false;
       } else {
         alert('Failed to send PDF: ' + message);
       }
