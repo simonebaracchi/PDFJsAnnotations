@@ -3,13 +3,6 @@
  * Author: Ravisha Heshan
  */
 
-/*
-$.ajax({ url: './brush.js', dataType: 'script', async: false, cache: false });
-$.ajax({ url: './arrow.fabric.js', dataType: 'script', async: false, cache: false });
-$.ajax({ url: './rect.fabric.js', dataType: 'script', async: false, cache: false });
-$.ajax({ url: './ellipse.fabric.js', dataType: 'script', async: false, cache: false });
-*/
-
 const { PDFDocument, rgb } = PDFLib;
 
 var PDFAnnotate = function (container_id, url, options = {}) {
