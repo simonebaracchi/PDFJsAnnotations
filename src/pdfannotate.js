@@ -345,6 +345,7 @@ PDFAnnotate.prototype.savePdf = async function (method, options) {
     // Trigger the browser to download the PDF document
     download(pdfBytes, fileName, 'application/pdf');
     inst.needSave = false;
+    return true;
   } else if (method == 'upload') {
     try {
       const params = new URLSearchParams(options.requestArgs);
@@ -359,11 +360,14 @@ PDFAnnotate.prototype.savePdf = async function (method, options) {
       if (response.ok) {
         console.log(message);
         inst.needSave = false;
+        return true;
       } else {
-        alert('Failed to send PDF: ' + message);
+        console.error('Failed to send PDF: ' + message);
+        return false;
       }
     } catch (error) {
-      alert('Error uploading PDF: ' + error);
+      console.error('Error uploading PDF: ' + error);
+      return false;
     }
   }
 };

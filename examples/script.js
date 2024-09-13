@@ -74,11 +74,11 @@ function deleteSelectedObject(event) {
 }
 
 function uploadPDF() {
-  pdf.savePdf('upload', { url: 'upload.php' }); // save with given file name
+  withSpinner('upload-button', pdf.savePdf('upload', { url: 'upload.php' }));
 }
 
 function downloadPDF() {
-  pdf.savePdf('download', { filename: 'output.pdf' }); // save with given file name
+  withSpinner('download-button', pdf.savePdf('download', { filename: 'output.pdf' })); // save with given file name
 }
 
 function clearPage() {
@@ -92,6 +92,25 @@ function showPdfData() {
       .text(JSON.stringify(JSON.parse(string), null, 4));
     PR.prettyPrint();
     $('#dataModal').modal('show');
+  });
+}
+
+function withSpinner(id, callable) {
+  const element = document.getElementById(id);
+  const originalContent = element.innerHTML;
+  element.innerHTML = '<i class="fa fa-spinner"></i>Loading...';
+
+  // Call the function asynchronously
+  callable.then((success) => {
+    if (success) {
+      element.innerHTML = '<i class="fa fa-check"></i>Success!';
+      setTimeout(() => {
+        element.innerHTML = originalContent; // Revert to original content
+      }, 3000);
+    } else {
+      element.innerHTML = originalContent;
+      alert('PDF save failed');
+    }
   });
 }
 

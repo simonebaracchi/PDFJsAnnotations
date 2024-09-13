@@ -85,10 +85,14 @@
         <button class="btn btn-info btn-sm" onclick="showPdfData()">{}</button>
       </div>
       <div class="tool">
-        <button class="btn btn-light btn-sm" onclick="downloadPDF()"><i class="fa fa-download"></i> Download</button>
+        <button class="btn btn-light btn-sm" id="download-button" onclick="downloadPDF()">
+          <i class="fa fa-download"></i> Download
+        </button>
       </div>
       <div class="tool">
-        <button class="btn btn-light btn-sm" onclick="uploadPDF()"><i class="fa fa-save"></i> Upload</button>
+        <button class="btn btn-light btn-sm" id="upload-button" onclick="uploadPDF()">
+          <i class="fa fa-save"></i> Upload
+        </button>
       </div>
     </div>
     <div id="pdf-container"></div>
