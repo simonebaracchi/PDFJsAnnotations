@@ -8,18 +8,12 @@ function result($ok, $message): void {
     ));
 }
 
-try {
-    $input = file_get_contents(filename: "php://input");
-    $file = fopen(filename: $targetFile, mode: "wb");
-    if ($file == false) {
-        result(ok: false, message: "File upload failed: cannot open file on server");
-        return;
-    }
-    fwrite(stream: $file, data: $input);
-    fclose(stream: $file);
+if ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+    result(ok: false, message:"Error uploading file");
+} else if (move_uploaded_file($_FILES['file']['tmp_name'], $targetFile)) {
     result(ok: true, message: "PDF file uploaded successfully!");
-} catch(Exception $e) {
-    result(ok: false, message:"File upload failed: " . $e->getMessage());
+} else {
+    result(ok: false, message:"File upload failed");
 }
 
 ?>

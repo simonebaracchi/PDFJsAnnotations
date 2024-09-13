@@ -347,12 +347,12 @@ PDFAnnotate.prototype.savePdf = async function (method, options) {
     inst.needSave = false;
   } else if (method == 'upload') {
     try {
-      const request = await fetch(options.url, {
+      const params = new URLSearchParams(options.requestArgs);
+      const formData = new FormData();
+      formData.append('file', new Blob([pdfBytes], { type: 'application/pdf' }));
+      const request = await fetch(`${options.url}?${params.toString()}`, {
         method: 'POST',
-        body: pdfBytes,
-        headers: {
-          'Content-Type': 'application/pdf',
-        },
+        body: formData,
       });
       var response = await request.json();
       var message = response.statusText ?? 'No response from server';
