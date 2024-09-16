@@ -320,18 +320,25 @@ PDFAnnotate.prototype.savePdf = async function (method, options) {
 
   inst.fabricObjects.forEach(async function (fabricObj, index) {
     var page = basePdfDoc.getPage(index);
-
+    const rotationAngle = page.getRotation();
     const image = await basePdfDoc.embedPng(
       fabricObj.toDataURL({
         format: 'png',
       })
     );
 
+    var imageX = 0;
+    var imageY = 0;
+    if (rotationAngle.angle == 90) {
+      imageX = fabricObj.height / inst.scale;
+    }
+
     page.drawImage(image, {
-      x: fabricObj.x,
-      y: fabricObj.y,
+      x: imageX,
+      y: imageY,
       width: fabricObj.width / inst.scale,
       height: fabricObj.height / inst.scale,
+      rotate: rotationAngle,
     });
   });
 
