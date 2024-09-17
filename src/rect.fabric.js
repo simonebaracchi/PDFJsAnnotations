@@ -63,9 +63,12 @@ var Rectangle = (function () {
 
     var pointer = inst.canvas.getPointer(o.e);
     var activeObj = inst.canvas.getActiveObject();
+
     activeObj.set({
-      width: pointer.x - activeObj.left,
-      height: pointer.y - activeObj.top,
+      width: Math.abs(activeObj.left - pointer.x),
+      height: Math.abs(activeObj.top - pointer.y),
+      originX: activeObj.left < pointer.x ? 'left' : 'right',
+      originY: activeObj.top < pointer.y ? 'top' : 'bottom',
     });
     activeObj.setCoords();
     inst.canvas.renderAll();
