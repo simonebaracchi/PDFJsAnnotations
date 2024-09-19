@@ -140,4 +140,15 @@ $(function () {
       e.returnValue = ''; // For legacy browsers
     }
   });
+
+  window.addEventListener(
+    'wheel',
+    function (event) {
+      if (event.ctrlKey) {
+        event.preventDefault();
+        pdf.zoom(event.deltaY);
+      }
+    },
+    { passive: false }
+  );
 });

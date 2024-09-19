@@ -22,6 +22,8 @@ var PDFAnnotate = function (container_id, url, options = {}) {
   this.autoConfirmBeforeDeletingObject = true;
   this.scale = 1.5;
   this.needSave = false;
+  this.pdfjs;
+  this.renderTasks = {};
 
   var inst = this;
   this.brush = new Brush(function (brush) {
@@ -43,6 +45,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
     var loadingTask = pdfjsLib.getDocument({ data: inst.origPdfBytes });
     loadingTask.promise.then(
       function (pdf) {
+        inst.pdfjs = pdf;
         inst.scale = options.scale ? options.scale : inst.scale;
         inst.number_of_pages = pdf.numPages;
 
@@ -72,7 +75,6 @@ var PDFAnnotate = function (container_id, url, options = {}) {
               canvasContext: context,
               viewport: viewport,
             };
-
             var renderTask = page.render(renderContext);
             renderTask.promise.then(function () {
               inst.pages_rendered++;
@@ -95,6 +97,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
       var fabricCanvasWrapper = document.createElement('div');
       fabricCanvasWrapper.className = 'pdfannotate-fabric-canvas';
       el.appendChild(fabricCanvasWrapper);
+      $(fabricCanvasWrapper).attr('id', 'page-' + index + '-fabric-canvas-wrapper');
       $(fabricCanvasWrapper).css('height', $(pdfCanvas).height());
       $(fabricCanvasWrapper).css('width', $(pdfCanvas).width());
       $(fabricCanvasWrapper).css('z-index', '1');
@@ -107,6 +110,7 @@ var PDFAnnotate = function (container_id, url, options = {}) {
       fabricObj.freeDrawingBrush.color = inst.brush.color;
       fabricObj.setHeight($(pdfCanvas).height());
       fabricObj.setWidth($(pdfCanvas).width());
+      fabricObj.setViewportTransform([inst.scale, 0, 0, inst.scale, 0, 0]);
 
       inst.fabricObjects.push(fabricObj);
       if (typeof options.onPageUpdated == 'function') {
@@ -158,8 +162,8 @@ var PDFAnnotate = function (container_id, url, options = {}) {
     var toolObj;
     if (inst.active_tool == 2) {
       toolObj = new fabric.IText(inst.textBoxText, {
-        left: event.clientX - fabricObj.upperCanvasEl.getBoundingClientRect().left,
-        top: event.clientY - fabricObj.upperCanvasEl.getBoundingClientRect().top,
+        left: (event.clientX - fabricObj.upperCanvasEl.getBoundingClientRect().left) / inst.scale,
+        top: (event.clientY - fabricObj.upperCanvasEl.getBoundingClientRect().top) / inst.scale,
         fill: inst.brush.color,
         fontSize: inst.font_size,
         selectable: true,
@@ -170,6 +174,53 @@ var PDFAnnotate = function (container_id, url, options = {}) {
       fabricObj.add(toolObj);
     }
   };
+};
+
+PDFAnnotate.prototype.zoom = function (amount) {
+  var inst = this;
+  if (inst.pdfjs == undefined) return;
+  inst.scale *= 1 - amount / 1000;
+  inst.fabricObjects.forEach(function (fabricObj, index) {
+    inst.pdfjs.getPage(index + 1).then(function (page) {
+      var viewport = page.getViewport({ scale: inst.scale });
+      var pdfCanvas = $('#page-' + (index + 1) + '-pdf-canvas').get(0);
+      pdfCanvas.height = viewport.height;
+      pdfCanvas.width = viewport.width;
+      var context = pdfCanvas.getContext('2d');
+      var renderContext = {
+        canvasContext: context,
+        viewport: viewport,
+      };
+      inst.render(page, renderContext);
+
+      var fabricCanvasWrapper = $('#page-' + index + '-fabric-canvas-wrapper').get(0);
+      $(fabricCanvasWrapper).css('height', $(pdfCanvas).height());
+      $(fabricCanvasWrapper).css('width', $(pdfCanvas).width());
+      fabricObj.setHeight($(pdfCanvas).height());
+      fabricObj.setWidth($(pdfCanvas).width());
+      fabricObj.setViewportTransform([inst.scale, 0, 0, inst.scale, 0, 0]);
+    });
+  });
+};
+
+PDFAnnotate.prototype.render = function (page, renderContext) {
+  var inst = this;
+  if (page.pageNumber in inst.renderTasks) {
+    inst.renderTasks[page.pageNumber] = renderContext;
+    return;
+  }
+  var renderTask = page.render(renderContext);
+  inst.renderTasks[page.pageNumber] = 'ongoing';
+
+  renderTask.promise.then(function () {
+    if (inst.renderTasks[page.pageNumber] == 'ongoing') {
+      delete inst.renderTasks[page.pageNumber];
+    } else {
+      renderContext = inst.renderTasks[page.pageNumber];
+      delete inst.renderTasks[page.pageNumber];
+      inst.render(page, renderContext);
+    }
+  });
 };
 
 PDFAnnotate.prototype.disableDrawingTool = function () {
@@ -321,6 +372,14 @@ PDFAnnotate.prototype.savePdf = async function (method, options) {
   inst.fabricObjects.forEach(async function (fabricObj, index) {
     var page = basePdfDoc.getPage(index);
     const rotationAngle = page.getRotation();
+
+    var renderingScale = 180 / 72; // try to always render at 180 dpi
+    var viewHeight = fabricObj.height;
+    var viewWidth = fabricObj.width;
+    fabricObj.setHeight(viewHeight / (inst.scale / renderingScale));
+    fabricObj.setWidth(viewWidth / (inst.scale / renderingScale));
+    fabricObj.setViewportTransform([renderingScale, 0, 0, renderingScale, 0, 0]);
+
     const image = await basePdfDoc.embedPng(
       fabricObj.toDataURL({
         format: 'png',
@@ -330,16 +389,20 @@ PDFAnnotate.prototype.savePdf = async function (method, options) {
     var imageX = 0;
     var imageY = 0;
     if (rotationAngle.angle == 90) {
-      imageX = fabricObj.height / inst.scale;
+      imageX = fabricObj.height / renderingScale;
     }
 
     page.drawImage(image, {
       x: imageX,
       y: imageY,
-      width: fabricObj.width / inst.scale,
-      height: fabricObj.height / inst.scale,
+      width: fabricObj.width / renderingScale,
+      height: fabricObj.height / renderingScale,
       rotate: rotationAngle,
     });
+    // restore original size
+    fabricObj.setHeight(viewHeight);
+    fabricObj.setWidth(viewWidth);
+    fabricObj.setViewportTransform([inst.scale, 0, 0, inst.scale, 0, 0]);
   });
 
   const pdfBytes = await basePdfDoc.save();
