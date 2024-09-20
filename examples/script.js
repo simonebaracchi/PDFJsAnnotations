@@ -1,5 +1,59 @@
 $.ajax({ url: './../src/pdfannotate.min.js', dataType: 'script', async: false, cache: false });
 
+class PanningHandler {
+  constructor() {
+    // Variables to track the mouse position and the scroll position
+    this.isEnabled = false;
+    this.isPanning = false;
+    this.startX;
+    this.startY;
+    this.scrollLeft;
+    this.scrollTop;
+
+    window.addEventListener('mousedown', (e) => {
+      if (!this.isEnabled) return;
+      // Enable panning mode
+      this.isPanning = true;
+
+      // Record the initial mouse position and scroll position
+      this.startX = e.pageX - window.scrollX;
+      this.startY = e.pageY - window.scrollY;
+      this.scrollLeft = window.scrollX;
+      this.scrollTop = window.scrollY;
+
+      // Change the cursor to indicate panning
+      document.body.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      // Only perform panning when the mouse is pressed
+      if (!this.isPanning) return;
+
+      // Calculate the new scroll positions based on mouse movement
+      const x = e.pageX - window.scrollX;
+      const y = e.pageY - window.scrollY;
+
+      const walkX = x - this.startX; // Distance moved horizontally
+      const walkY = y - this.startY; // Distance moved vertically
+
+      window.scrollTo({
+        left: this.scrollLeft - walkX,
+        top: this.scrollTop - walkY,
+      });
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!this.isPanning) return;
+      // Disable panning mode
+      this.isPanning = false;
+
+      // Reset the cursor
+      document.body.style.cursor = 'default';
+    });
+  }
+}
+
+var panningHandler = new PanningHandler();
 var pdf = new PDFAnnotate('pdf-container', 'sample.pdf', {
   onPageUpdated(page, oldData, newData) {
     console.log(page, oldData, newData);
@@ -19,6 +73,7 @@ var pdf = new PDFAnnotate('pdf-container', 'sample.pdf', {
 pdf.setBorderSize(1);
 pdf.setBrushSize($('#brush-size').val());
 pdf.setColor($('.color-tool.active').get(0).style.backgroundColor, $('.color-tool.active').get(0).style.opacity);
+panningHandler.isEnabled = true;
 
 function changeActiveTool(event) {
   var element = $(event.target).hasClass('tool-button')
@@ -26,8 +81,15 @@ function changeActiveTool(event) {
     : $(event.target).parents('.tool-button').first();
   $('.tool-button.active').removeClass('active');
   $(element).addClass('active');
+  panningHandler.isEnabled = false;
 }
 
+function enableMove(event) {
+  event.preventDefault();
+  changeActiveTool(event);
+  pdf.disableDrawingTool();
+  panningHandler.isEnabled = true;
+}
 function enableSelector(event) {
   event.preventDefault();
   changeActiveTool(event);

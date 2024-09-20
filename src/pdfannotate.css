@@ -18,3 +18,7 @@ canvas,
   grid-column: 1;
   grid-row: 1;
 }
+
+.pdfannotate-locked {
+  pointer-events: none;
+}
