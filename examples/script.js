@@ -70,9 +70,11 @@ var pdf = new PDFAnnotate('pdf-container', 'sample.pdf', {
   },
   scale: 1.5,
 });
-pdf.setBorderSize(1);
 pdf.setBrushSize($('#brush-size').val());
-pdf.setColor($('.color-tool.active').get(0).style.backgroundColor, $('.color-tool.active').get(0).style.opacity);
+var color = $('.color-tool.active').get(0).style.backgroundColor;
+var opacity = $('.color-tool.active').get(0).style.opacity;
+pdf.setColor(color, opacity);
+pdf.setFillColor(color, opacity);
 panningHandler.isEnabled = true;
 
 function changeActiveTool(event) {
@@ -183,6 +185,7 @@ $(function () {
     color = $(this).get(0).style.backgroundColor;
     alpha = $(this).get(0).style.opacity;
     pdf.setColor(color, alpha);
+    pdf.setFillColor(color, alpha);
   });
 
   $('#brush-size').change(function () {

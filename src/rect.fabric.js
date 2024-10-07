@@ -81,9 +81,9 @@ var Rectangle = (function () {
     var pointer = inst.canvas.getPointer(o.e);
 
     var line = new fabric.InteractiveRectangle({
-      strokeWidth: inst.brush.borderSize,
-      fill: inst.brush.color ? inst.brush.color : 'red',
-      stroke: inst.brush.color ? inst.brush.color : 'red',
+      strokeWidth: inst.brush.brushSize,
+      fill: inst.brush.fillColor,
+      stroke: inst.brush.color,
       hasBorders: false,
       hasControls: true,
       selectable: true,

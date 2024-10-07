@@ -65,13 +65,11 @@ pdf.serializePdf(function (serializedString) {}); // returns JSON string with ca
 
 pdf.loadFromJSON(serializedJSON); // continue edit with saved JSON. To do this on page load use `ready` option(scripts.js line 9)
 
-pdf.setColor(color, alpha); // Set color for tools (Example: pdf.setColor(red) , pdf.setColor('#fff'), pdf.setColor('rgba(255,0,0), 0.5)'))
+pdf.setColor(color, alpha); // Set color for pencil/arrow and rectangle/ellipse borders (Example: pdf.setColor(red) , pdf.setColor('#fff'), pdf.setColor('rgba(255,0,0), 0.5)'))
 
-pdf.setBorderColor(color); // Set border color for rectangle tool (Example: pdf.setBorderColor(red) , pdf.setBorderColor('#fff'))
+pdf.setFillColor(color, alpha); // Set fill color for rectangle/ellipse tool (Example: pdf.setFillColor(red) , pdf.setFillColor('#fff'), default is transparent)
 
-pdf.setBrushSize(width); // Set brush size for pencil tool (Example: pdf.setBrushSize(5))
+pdf.setBrushSize(width); // Set stroke size for pencil tool and border size for rectangle/ellipse (Example: pdf.setBrushSize(5))
 
 pdf.setFontSize(font_size); // Set font size for text tool (Example: pdf.setFontSize(18))
-
-pdf.setBorderSize(border_size); // Set border size of rectangles (Example: pdf.setBorderSize(2))
 ```

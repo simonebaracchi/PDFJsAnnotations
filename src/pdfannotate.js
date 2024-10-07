@@ -466,12 +466,8 @@ PDFAnnotate.prototype.setColor = function (color, alpha = 1) {
   this.brush.setColor(color, alpha);
 };
 
-PDFAnnotate.prototype.setBorderColor = function (color) {
-  this.brush.setBorderColor(color);
-};
-
-PDFAnnotate.prototype.setBorderSize = function (size) {
-  this.brush.setBorderSize(size);
+PDFAnnotate.prototype.setFillColor = function (color, alpha = 1) {
+  this.brush.setFillColor(color, alpha);
 };
 
 PDFAnnotate.prototype.clearActivePage = function () {
