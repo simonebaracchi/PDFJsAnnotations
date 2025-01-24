@@ -377,6 +377,15 @@ PDFAnnotate.prototype.deleteSelectedObject = function () {
   }
 };
 
+PDFAnnotate.prototype.isEditing = function () {
+  var inst = this;
+  var activeObject = inst.fabricObjects[inst.active_canvas].getActiveObject();
+  if (activeObject) {
+    return activeObject.isEditing;
+  }
+  return false;
+};
+
 PDFAnnotate.prototype.savePdf = async function (method, options) {
   var inst = this;
   options = options ?? {};

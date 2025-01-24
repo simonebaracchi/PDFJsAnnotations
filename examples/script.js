@@ -64,7 +64,7 @@ var pdf = new PDFAnnotate('pdf-container', 'sample.pdf', {
 
     $('html').keyup(function (e) {
       if (e.keyCode == 46) {
-        pdf.deleteSelectedObject();
+        if (!pdf.isEditing()) pdf.deleteSelectedObject();
       }
     });
   },
