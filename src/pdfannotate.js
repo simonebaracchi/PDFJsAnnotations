@@ -391,7 +391,14 @@ PDFAnnotate.prototype.savePdf = async function (method, options) {
   options = options ?? {};
   const basePdfDoc = await PDFDocument.load(inst.origPdfBytes);
 
-  inst.fabricObjects.forEach(async function (fabricObj, index) {
+  for (let index = 0; index < inst.fabricObjects.length; index++) {
+    const fabricObj = inst.fabricObjects[index];
+    
+    // Skip empty canvases
+    if (fabricObj.getObjects().length === 0) {
+      continue;
+    }
+    
     var page = basePdfDoc.getPage(index);
     const rotationAngle = page.getRotation();
 
@@ -402,30 +409,53 @@ PDFAnnotate.prototype.savePdf = async function (method, options) {
     fabricObj.setWidth(viewWidth / (inst.scale / renderingScale));
     fabricObj.setViewportTransform([renderingScale, 0, 0, renderingScale, 0, 0]);
 
-    const image = await basePdfDoc.embedPng(
-      fabricObj.toDataURL({
-        format: 'png',
-      })
-    );
+    const pngDataUrl = fabricObj.toDataURL({ format: 'png' });
+    const image = await basePdfDoc.embedPng(pngDataUrl);
 
-    var imageX = 0;
-    var imageY = 0;
-    if (rotationAngle.angle == 90) {
-      imageX = fabricObj.height / renderingScale;
+    const imageWidth = fabricObj.width / renderingScale;
+    const imageHeight = fabricObj.height / renderingScale;
+    
+    let x, y, w, h, rot;
+    
+    if (rotationAngle.angle === 0) {
+      x = 0;
+      y = 0;
+      w = imageWidth;
+      h = imageHeight;
+      rot = { type: 'degrees', angle: 0 };
+    } else if (rotationAngle.angle === 270) {
+      x = 0;
+      y = imageWidth;
+      w = imageWidth;
+      h = imageHeight;
+      rot = { type: 'degrees', angle: 270 };
+    } else if (rotationAngle.angle === 90) {
+      x = imageHeight;
+      y = 0;
+      w = imageWidth;
+      h = imageHeight;
+      rot = { type: 'degrees', angle: 90 };
+    } else if (rotationAngle.angle === 180) {
+      x = imageWidth;
+      y = imageHeight;
+      w = imageWidth;
+      h = imageHeight;
+      rot = { type: 'degrees', angle: 180 };
     }
-
+    
     page.drawImage(image, {
-      x: imageX,
-      y: imageY,
-      width: fabricObj.width / renderingScale,
-      height: fabricObj.height / renderingScale,
-      rotate: rotationAngle,
+      x: x,
+      y: y,
+      width: w,
+      height: h,
+      rotate: rot,
     });
+    
     // restore original size
     fabricObj.setHeight(viewHeight);
     fabricObj.setWidth(viewWidth);
     fabricObj.setViewportTransform([inst.scale, 0, 0, inst.scale, 0, 0]);
-  });
+  }
 
   const pdfBytes = await basePdfDoc.save();
 
